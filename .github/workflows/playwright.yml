@@ -1,0 +1,27 @@
+name: CSharp Playwright Tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: dotnet restore
+      - run: dotnet build --configuration Release --no-restore
+      - run: pwsh bin/Release/net8.0/playwright.ps1 install --with-deps
+      - run: dotnet test --configuration Release --no-build --settings nunit.runsettings
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: csharp-playwright-artifacts
+          path: |
+            artifacts
+            TestResults

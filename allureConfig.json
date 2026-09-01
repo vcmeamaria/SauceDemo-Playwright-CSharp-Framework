@@ -1,0 +1,8 @@
+{
+  "allure": {
+    "directory": "artifacts/allure-results",
+    "links": [
+      "https://your-test-management-system.example/{link}"
+    ]
+  }
+}
