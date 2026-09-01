@@ -12,25 +12,44 @@ public sealed class InventoryPage : BasePage
     private ILocator CartLink => Page.GetByTestId("shopping-cart-link");
     private ILocator CartBadge => Page.GetByTestId("shopping-cart-badge");
     private ILocator Sort => Page.GetByTestId("product-sort-container");
-    private ILocator MenuButton => Page.GetByRole(AriaRole.Button, new() { Name = "Open Menu" });
+    private ILocator MenuButton => Page.GetByRole(
+        AriaRole.Button,
+        new() { Name = "Open Menu" });
 
     public InventoryPage(IPage page) : base(page) { }
 
     public Task AssertLoadedAsync() =>
         Expect(InventoryContainer).ToBeVisibleAsync();
 
-    public Task<int> ProductCountAsync() => Items.CountAsync();
+    public Task<int> ProductCountAsync() =>
+        Items.CountAsync();
 
     public async Task AddProductAsync(string productName)
     {
-        var item = Items.Filter(new() { HasText = productName });
-        await ClickAsync(item.GetByRole(AriaRole.Button, new() { Name = "Add to cart" }), $"Add {productName}");
+        var item = Items.Filter(new()
+        {
+            HasText = productName
+        });
+
+        await ClickAsync(
+            item.GetByRole(
+                AriaRole.Button,
+                new() { Name = "Add to cart" }),
+            $"Add {productName}");
     }
 
     public async Task RemoveProductAsync(string productName)
     {
-        var item = Items.Filter(new() { HasText = productName });
-        await ClickAsync(item.GetByRole(AriaRole.Button, new() { Name = "Remove" }), $"Remove {productName}");
+        var item = Items.Filter(new()
+        {
+            HasText = productName
+        });
+
+        await ClickAsync(
+            item.GetByRole(
+                AriaRole.Button,
+                new() { Name = "Remove" }),
+            $"Remove {productName}");
     }
 
     public Task AssertCartCountAsync(int count) =>
@@ -40,12 +59,22 @@ public sealed class InventoryPage : BasePage
         Expect(CartBadge).ToHaveCountAsync(0);
 
     public async Task OpenCartAsync() =>
-        await ClickAsync(CartLink, "Shopping cart");
+        await ClickAsync(
+            CartLink,
+            "Shopping cart");
 
     public async Task OpenProductAsync(string productName)
     {
-        var item = Items.Filter(new() { HasText = productName });
-        await ClickAsync(item.GetByRole(AriaRole.Link, new() { Name = productName }), $"Product {productName}");
+        var item = Items.Filter(new()
+        {
+            HasText = productName
+        });
+
+        var productTitle = item.GetByTestId("inventory-item-name");
+
+        await ClickAsync(
+            productTitle,
+            $"Product {productName}");
     }
 
     public async Task SortAsync(string value)
@@ -54,14 +83,25 @@ public sealed class InventoryPage : BasePage
     }
 
     public async Task<IReadOnlyList<string>> ProductNamesAsync() =>
-        await Items.GetByTestId("inventory-item-name").AllInnerTextsAsync();
+        await Items
+            .GetByTestId("inventory-item-name")
+            .AllInnerTextsAsync();
 
     public async Task<IReadOnlyList<decimal>> ProductPricesAsync()
     {
-        var texts = await Items.GetByTestId("inventory-item-price").AllInnerTextsAsync();
-        return texts.Select(t => decimal.Parse(t.Replace("$", ""), System.Globalization.CultureInfo.InvariantCulture)).ToList();
+        var texts = await Items
+            .GetByTestId("inventory-item-price")
+            .AllInnerTextsAsync();
+
+        return texts
+            .Select(t => decimal.Parse(
+                t.Replace("$", ""),
+                System.Globalization.CultureInfo.InvariantCulture))
+            .ToList();
     }
 
     public async Task OpenMenuAsync() =>
-        await ClickAsync(MenuButton, "Open menu");
+        await ClickAsync(
+            MenuButton,
+            "Open menu");
 }

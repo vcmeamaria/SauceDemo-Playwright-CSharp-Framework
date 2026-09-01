@@ -4,7 +4,7 @@ namespace SauceDemo.Playwright.CSharp.Config;
 
 public sealed record UserCredential(string Username, string Password);
 
-public sealed class TestSettings
+public sealed record TestSettings
 {
     public string BaseUrl { get; init; } = "https://www.saucedemo.com/";
     public string Browser { get; init; } = "chromium";
@@ -17,7 +17,8 @@ public sealed class TestSettings
     public bool ScreenshotOnFailure { get; init; } = true;
     public int ViewportWidth { get; init; } = 1440;
     public int ViewportHeight { get; init; } = 900;
-    public Dictionary<string, UserCredential> Users { get; init; } = new(StringComparer.OrdinalIgnoreCase);
+    public Dictionary<string, UserCredential> Users { get; init; } =
+        new(StringComparer.OrdinalIgnoreCase);
 
     public static TestSettings Load()
     {
@@ -31,21 +32,38 @@ public sealed class TestSettings
                    ?? throw new FileNotFoundException("appsettings.json was not found.");
 
         var json = File.ReadAllText(path);
-        var settings = JsonSerializer.Deserialize<TestSettings>(json, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        }) ?? throw new InvalidOperationException("Unable to deserialize appsettings.json.");
+
+        var settings = JsonSerializer.Deserialize<TestSettings>(
+            json,
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            })
+            ?? throw new InvalidOperationException(
+                "Unable to deserialize appsettings.json.");
 
         return settings with
         {
-            BaseUrl = Environment.GetEnvironmentVariable("BASE_URL") ?? settings.BaseUrl,
-            Browser = Environment.GetEnvironmentVariable("BROWSER") ?? settings.Browser,
-            Headless = bool.TryParse(Environment.GetEnvironmentVariable("HEADLESS"), out var h) ? h : settings.Headless
+            BaseUrl =
+                Environment.GetEnvironmentVariable("BASE_URL")
+                ?? settings.BaseUrl,
+
+            Browser =
+                Environment.GetEnvironmentVariable("BROWSER")
+                ?? settings.Browser,
+
+            Headless =
+                bool.TryParse(
+                    Environment.GetEnvironmentVariable("HEADLESS"),
+                    out var headless)
+                    ? headless
+                    : settings.Headless
         };
     }
 
     public UserCredential User(string name) =>
         Users.TryGetValue(name, out var user)
             ? user
-            : throw new KeyNotFoundException($"User profile '{name}' is not configured.");
+            : throw new KeyNotFoundException(
+                $"User profile '{name}' is not configured.");
 }

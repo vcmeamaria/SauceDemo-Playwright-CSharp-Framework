@@ -29,6 +29,7 @@ public abstract class BaseTest : PageTest
     public override BrowserNewContextOptions ContextOptions()
     {
         ArtifactPaths.EnsureCreated();
+
         return new BrowserNewContextOptions
         {
             BaseURL = Settings.BaseUrl,
@@ -38,7 +39,9 @@ public abstract class BaseTest : PageTest
                 Height = Settings.ViewportHeight
             },
             IgnoreHTTPSErrors = false,
-            RecordVideoDir = Settings.RecordVideo ? ArtifactPaths.Videos : null
+            RecordVideoDir = Settings.RecordVideo
+                ? ArtifactPaths.Videos
+                : null
         };
     }
 
@@ -51,11 +54,23 @@ public abstract class BaseTest : PageTest
     [SetUp]
     public async Task BeforeEach()
     {
+        // SauceDemo uses "data-test" attributes rather than
+        // Playwright's default "data-testid" attribute.
+        Playwright.Selectors.SetTestIdAttribute("data-test");
+
         Page.SetDefaultTimeout(Settings.DefaultTimeoutMs);
         Page.SetDefaultNavigationTimeout(Settings.NavigationTimeoutMs);
 
-        Page.Console += (_, msg) => Log.Information("Browser console [{Type}]: {Text}", msg.Type, msg.Text);
-        Page.PageError += (_, error) => Log.Error("Browser page error: {Error}", error);
+        Page.Console += (_, msg) =>
+            Log.Information(
+                "Browser console [{Type}]: {Text}",
+                msg.Type,
+                msg.Text);
+
+        Page.PageError += (_, error) =>
+            Log.Error(
+                "Browser page error: {Error}",
+                error);
 
         if (Settings.TraceOnFailure)
         {
@@ -65,6 +80,7 @@ public abstract class BaseTest : PageTest
                 Snapshots = true,
                 Sources = true
             });
+
             _traceStarted = true;
         }
     }
@@ -72,56 +88,104 @@ public abstract class BaseTest : PageTest
     [TearDown]
     public async Task AfterEach()
     {
-        var failed = TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Failed;
-        var testName = ArtifactPaths.SafeFileName(TestContext.CurrentContext.Test.Name);
-        var stamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
+        var failed =
+            TestContext.CurrentContext.Result.Outcome.Status ==
+            NUnit.Framework.Interfaces.TestStatus.Failed;
+
+        var testName =
+            ArtifactPaths.SafeFileName(
+                TestContext.CurrentContext.Test.Name);
+
+        var stamp =
+            DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
 
         try
         {
             if (failed && Settings.ScreenshotOnFailure)
             {
-                var screenshot = Path.Combine(ArtifactPaths.Screenshots, $"{testName}-{stamp}.png");
-                await Page.ScreenshotAsync(new() { Path = screenshot, FullPage = true });
-                TestContext.AddTestAttachment(screenshot, "Failure screenshot");
-                AllureApi.AddAttachment("Failure screenshot", "image/png", File.ReadAllBytes(screenshot));
+                var screenshot = Path.Combine(
+                    ArtifactPaths.Screenshots,
+                    $"{testName}-{stamp}.png");
+
+                await Page.ScreenshotAsync(new()
+                {
+                    Path = screenshot,
+                    FullPage = true
+                });
+
+                TestContext.AddTestAttachment(
+                    screenshot,
+                    "Failure screenshot");
+
+                AllureApi.AddAttachment(
+                    "Failure screenshot",
+                    "image/png",
+                    File.ReadAllBytes(screenshot));
             }
 
             if (_traceStarted)
             {
-                var trace = Path.Combine(ArtifactPaths.Traces, $"{testName}-{stamp}.zip");
-                await Context.Tracing.StopAsync(new() { Path = failed ? trace : null });
+                var trace = Path.Combine(
+                    ArtifactPaths.Traces,
+                    $"{testName}-{stamp}.zip");
+
+                await Context.Tracing.StopAsync(new()
+                {
+                    Path = failed ? trace : null
+                });
+
                 if (failed && File.Exists(trace))
-                    TestContext.AddTestAttachment(trace, "Playwright trace");
+                {
+                    TestContext.AddTestAttachment(
+                        trace,
+                        "Playwright trace");
+                }
             }
         }
         catch (Exception ex)
         {
-            Log.Warning(ex, "Unable to collect failure artifacts.");
+            Log.Warning(
+                ex,
+                "Unable to collect failure artifacts.");
         }
     }
 
-    protected async Task LoginAsAsync(string profile = "standard")
+    protected async Task LoginAsAsync(
+        string profile = "standard")
     {
         var user = Settings.User(profile);
+
         await LoginPage.OpenAsync(Settings.BaseUrl);
-        await LoginPage.LoginAsync(user.Username, user.Password);
+
+        await LoginPage.LoginAsync(
+            user.Username,
+            user.Password);
+
         await InventoryPage.AssertLoadedAsync();
     }
 
-    protected async Task AddAndOpenCartAsync(params string[] products)
+    protected async Task AddAndOpenCartAsync(
+        params string[] products)
     {
         foreach (var product in products)
+        {
             await InventoryPage.AddProductAsync(product);
+        }
 
         await InventoryPage.OpenCartAsync();
         await CartPage.AssertLoadedAsync();
     }
 
-    protected async Task ReachOverviewAsync(params string[] products)
+    protected async Task ReachOverviewAsync(
+        params string[] products)
     {
         await LoginAsAsync();
+
         await AddAndOpenCartAsync(products);
+
         await CartPage.CheckoutAsync();
-        await CheckoutInformationPage.ContinueAsync(Models.CheckoutCustomer.ValidUkCustomer);
+
+        await CheckoutInformationPage.ContinueAsync(
+            Models.CheckoutCustomer.ValidUkCustomer);
     }
 }
