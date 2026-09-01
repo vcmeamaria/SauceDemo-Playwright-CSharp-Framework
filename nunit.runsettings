@@ -1,9 +1,10 @@
 <RunSettings>
-  <RunConfiguration>
-    <MaxCpuCount>4</MaxCpuCount>
-    <ResultsDirectory>artifacts/test-results</ResultsDirectory>
-  </RunConfiguration>
-  <NUnit>
-    <NumberOfTestWorkers>4</NumberOfTestWorkers>
-  </NUnit>
+	<RunConfiguration>
+		<MaxCpuCount>1</MaxCpuCount>
+		<ResultsDirectory>artifacts/test-results</ResultsDirectory>
+	</RunConfiguration>
+
+	<NUnit>
+		<NumberOfTestWorkers>1</NumberOfTestWorkers>
+	</NUnit>
 </RunSettings>
