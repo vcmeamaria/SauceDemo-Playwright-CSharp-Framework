@@ -7,24 +7,37 @@ public sealed class InventoryPage : BasePage
 {
     public const string Route = "inventory.html";
 
-    private ILocator InventoryContainer => Page.GetByTestId("inventory-container");
-    private ILocator Items => Page.GetByTestId("inventory-item");
-    private ILocator CartLink => Page.GetByTestId("shopping-cart-link");
-    private ILocator CartBadge => Page.GetByTestId("shopping-cart-badge");
-    private ILocator Sort => Page.GetByTestId("product-sort-container");
-    private ILocator MenuButton => Page.GetByRole(
-        AriaRole.Button,
-        new() { Name = "Open Menu" });
+    private ILocator InventoryContainer =>
+        ByDataTest("inventory-container");
+
+    private ILocator Items =>
+        ByDataTest("inventory-item");
+
+    private ILocator CartLink =>
+        ByDataTest("shopping-cart-link");
+
+    private ILocator CartBadge =>
+        ByDataTest("shopping-cart-badge");
+
+    private ILocator Sort =>
+        ByDataTest("product-sort-container");
+
+    private ILocator MenuButton =>
+        Page.GetByRole(
+            AriaRole.Button,
+            new() { Name = "Open Menu" });
 
     public InventoryPage(IPage page) : base(page) { }
 
     public Task AssertLoadedAsync() =>
-        Expect(InventoryContainer).ToBeVisibleAsync();
+        Expect(InventoryContainer)
+            .ToBeVisibleAsync();
 
     public Task<int> ProductCountAsync() =>
         Items.CountAsync();
 
-    public async Task AddProductAsync(string productName)
+    public async Task AddProductAsync(
+        string productName)
     {
         var item = Items.Filter(new()
         {
@@ -38,7 +51,8 @@ public sealed class InventoryPage : BasePage
             $"Add {productName}");
     }
 
-    public async Task RemoveProductAsync(string productName)
+    public async Task RemoveProductAsync(
+        string productName)
     {
         var item = Items.Filter(new()
         {
@@ -53,24 +67,30 @@ public sealed class InventoryPage : BasePage
     }
 
     public Task AssertCartCountAsync(int count) =>
-        Expect(CartBadge).ToHaveTextAsync(count.ToString());
+        Expect(CartBadge)
+            .ToHaveTextAsync(count.ToString());
 
     public Task AssertCartBadgeAbsentAsync() =>
-        Expect(CartBadge).ToHaveCountAsync(0);
+        Expect(CartBadge)
+            .ToHaveCountAsync(0);
 
     public async Task OpenCartAsync() =>
         await ClickAsync(
             CartLink,
             "Shopping cart");
 
-    public async Task OpenProductAsync(string productName)
+    public async Task OpenProductAsync(
+        string productName)
     {
         var item = Items.Filter(new()
         {
             HasText = productName
         });
 
-        var productTitle = item.GetByTestId("inventory-item-name");
+        var productTitle =
+            ByDataTest(
+                item,
+                "inventory-item-name");
 
         await ClickAsync(
             productTitle,
@@ -82,15 +102,21 @@ public sealed class InventoryPage : BasePage
         await Sort.SelectOptionAsync(value);
     }
 
-    public async Task<IReadOnlyList<string>> ProductNamesAsync() =>
-        await Items
-            .GetByTestId("inventory-item-name")
-            .AllInnerTextsAsync();
-
-    public async Task<IReadOnlyList<decimal>> ProductPricesAsync()
+    public async Task<IReadOnlyList<string>>
+        ProductNamesAsync()
     {
-        var texts = await Items
-            .GetByTestId("inventory-item-price")
+        return await ByDataTest(
+                Items,
+                "inventory-item-name")
+            .AllInnerTextsAsync();
+    }
+
+    public async Task<IReadOnlyList<decimal>>
+        ProductPricesAsync()
+    {
+        var texts = await ByDataTest(
+                Items,
+                "inventory-item-price")
             .AllInnerTextsAsync();
 
         return texts

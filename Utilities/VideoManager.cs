@@ -1,4 +1,5 @@
 ﻿using Microsoft.Playwright;
+using System.Text.RegularExpressions;
 
 namespace SauceDemo.Playwright.CSharp.Utilities;
 
@@ -6,29 +7,51 @@ public static class VideoManager
 {
     private const int MaximumVideos = 3;
 
-    private static readonly SemaphoreSlim Sync = new(1, 1);
+    private static readonly SemaphoreSlim Sync =
+        new(1, 1);
+
+    private static readonly object PrepareSync =
+        new();
+
+    private static bool _prepared;
+
+    private static readonly Regex ManagedVideoPattern =
+        new(
+            @".+-\d{8}-\d{6}-\d{3}\.webm$",
+            RegexOptions.Compiled |
+            RegexOptions.IgnoreCase);
 
     public static void Prepare()
     {
-        ArtifactPaths.EnsureCreated();
-
-        // Remove raw Playwright-generated videos left over
-        // from previous runs.
-        foreach (var file in Directory.EnumerateFiles(
-                     ArtifactPaths.Videos,
-                     "*.webm"))
+        lock (PrepareSync)
         {
-            var fileName = Path.GetFileName(file);
-
-            if (fileName.StartsWith(
-                    "page@",
-                    StringComparison.OrdinalIgnoreCase))
+            if (_prepared)
             {
-                File.Delete(file);
+                return;
             }
-        }
 
-        EnforceRetention();
+            ArtifactPaths.EnsureCreated();
+
+            // Clean up raw Playwright files left behind
+            // by an interrupted previous run.
+            foreach (var file in Directory.EnumerateFiles(
+                         ArtifactPaths.Videos,
+                         "page@*.webm"))
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch
+                {
+                    // Ignore stale files that are temporarily locked.
+                }
+            }
+
+            EnforceRetention();
+
+            _prepared = true;
+        }
     }
 
     public static async Task SaveAsync(
@@ -49,11 +72,9 @@ public static class VideoManager
                 ArtifactPaths.Videos,
                 $"{safeTestName}-{timestamp}.webm");
 
-            // Save the completed Playwright video using
-            // our own readable filename.
-            await video.SaveAsAsync(destinationPath);
+            await video.SaveAsAsync(
+                destinationPath);
 
-            // Remove Playwright's original randomly named copy.
             await video.DeleteAsync();
 
             EnforceRetention();
@@ -66,21 +87,31 @@ public static class VideoManager
 
     private static void EnforceRetention()
     {
-        if (!Directory.Exists(ArtifactPaths.Videos))
+        if (!Directory.Exists(
+                ArtifactPaths.Videos))
         {
             return;
         }
 
+        // IMPORTANT:
+        // Only manage completed videos using our naming
+        // convention. Never delete page@... files that
+        // another parallel test may still be recording.
         var videos = Directory
             .EnumerateFiles(
                 ArtifactPaths.Videos,
                 "*.webm")
-            .Select(path => new FileInfo(path))
+            .Where(path =>
+                ManagedVideoPattern.IsMatch(
+                    Path.GetFileName(path)))
+            .Select(path =>
+                new FileInfo(path))
             .OrderByDescending(file =>
                 file.LastWriteTimeUtc)
             .ToList();
 
-        foreach (var video in videos.Skip(MaximumVideos))
+        foreach (var video in
+                 videos.Skip(MaximumVideos))
         {
             video.Delete();
         }

@@ -11,7 +11,7 @@ using Serilog;
 namespace SauceDemo.Playwright.CSharp.Tests;
 
 [AllureNUnit]
-[Parallelizable(ParallelScope.Fixtures)]
+[Parallelizable(ParallelScope.Self)]
 public abstract class BaseTest : PageTest
 {
     protected static readonly TestSettings Settings =
@@ -173,8 +173,6 @@ public abstract class BaseTest : PageTest
             {
                 var video = Page.Video;
 
-                // A Playwright video is finalised when its
-                // page closes.
                 await Page.CloseAsync();
 
                 await VideoManager.SaveAsync(

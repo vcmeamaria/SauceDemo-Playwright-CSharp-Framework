@@ -12,6 +12,20 @@ public abstract class BasePage
 
     protected IPage Page { get; }
 
+    protected ILocator ByDataTest(string testId)
+    {
+        return Page.Locator(
+            $"[data-test=\"{testId}\"]");
+    }
+
+    protected static ILocator ByDataTest(
+        ILocator root,
+        string testId)
+    {
+        return root.Locator(
+            $"[data-test=\"{testId}\"]");
+    }
+
     protected async Task ClickAsync(
         ILocator locator,
         string description)

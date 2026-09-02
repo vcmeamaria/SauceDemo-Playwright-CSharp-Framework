@@ -6,31 +6,82 @@ namespace SauceDemo.Playwright.CSharp.Pages;
 
 public sealed class CheckoutInformationPage : BasePage
 {
-    private ILocator FirstName => Page.GetByTestId("firstName");
-    private ILocator LastName => Page.GetByTestId("lastName");
-    private ILocator PostalCode => Page.GetByTestId("postalCode");
-    private ILocator ContinueButton => Page.GetByTestId("continue");
-    private ILocator CancelButton => Page.GetByTestId("cancel");
-    private ILocator Error => Page.GetByTestId("error");
+    private ILocator FirstName =>
+        ByDataTest("firstName");
 
-    public CheckoutInformationPage(IPage page) : base(page) { }
+    private ILocator LastName =>
+        ByDataTest("lastName");
 
-    public async Task ContinueAsync(CheckoutCustomer customer)
+    private ILocator PostalCode =>
+        ByDataTest("postalCode");
+
+    private ILocator ContinueButton =>
+        ByDataTest("continue");
+
+    private ILocator CancelButton =>
+        ByDataTest("cancel");
+
+    private ILocator Error =>
+        ByDataTest("error");
+
+    public CheckoutInformationPage(IPage page)
+        : base(page) { }
+
+    public async Task ContinueAsync(
+        CheckoutCustomer customer)
     {
-        await FillAsync(FirstName, customer.FirstName, "first name");
-        await FillAsync(LastName, customer.LastName, "last name");
-        await FillAsync(PostalCode, customer.PostalCode, "postal code");
-        await ClickAsync(ContinueButton, "Continue checkout");
+        await FillAsync(
+            FirstName,
+            customer.FirstName,
+            "first name");
+
+        await FillAsync(
+            LastName,
+            customer.LastName,
+            "last name");
+
+        await FillAsync(
+            PostalCode,
+            customer.PostalCode,
+            "postal code");
+
+        await ClickAsync(
+            ContinueButton,
+            "Continue checkout");
     }
 
-    public async Task SubmitRawAsync(string first, string last, string postal)
+    public async Task SubmitRawAsync(
+        string first,
+        string last,
+        string postal)
     {
-        await FillAsync(FirstName, first, "first name");
-        await FillAsync(LastName, last, "last name");
-        await FillAsync(PostalCode, postal, "postal code");
-        await ClickAsync(ContinueButton, "Continue checkout");
+        await FillAsync(
+            FirstName,
+            first,
+            "first name");
+
+        await FillAsync(
+            LastName,
+            last,
+            "last name");
+
+        await FillAsync(
+            PostalCode,
+            postal,
+            "postal code");
+
+        await ClickAsync(
+            ContinueButton,
+            "Continue checkout");
     }
 
-    public Task AssertErrorContainsAsync(string text) => Expect(Error).ToContainTextAsync(text);
-    public async Task CancelAsync() => await ClickAsync(CancelButton, "Cancel checkout");
+    public Task AssertErrorContainsAsync(
+        string text) =>
+        Expect(Error)
+            .ToContainTextAsync(text);
+
+    public async Task CancelAsync() =>
+        await ClickAsync(
+            CancelButton,
+            "Cancel checkout");
 }
