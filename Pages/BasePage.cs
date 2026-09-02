@@ -12,17 +12,31 @@ public abstract class BasePage
 
     protected IPage Page { get; }
 
-    protected async Task ClickAsync(ILocator locator, string description)
+    protected async Task ClickAsync(
+        ILocator locator,
+        string description)
     {
-        Log.Information("Click: {Description}", description);
+        Log.Information(
+            "Click: {Description}",
+            description);
+
         await locator.ClickAsync();
     }
 
-    protected async Task FillAsync(ILocator locator, string value, string description, bool sensitive = false)
+    protected async Task FillAsync(
+        ILocator locator,
+        string value,
+        string description,
+        bool sensitive = false)
     {
-        Log.Information("Fill: {Description} = {Value}", description, sensitive ? "***" : value);
+        Log.Information(
+            "Fill: {Description} = {Value}",
+            description,
+            sensitive ? "***" : value);
+
         await locator.FillAsync(value);
     }
 
-    public Task<string> TitleAsync() => Page.TitleAsync();
+    public Task<string> TitleAsync() =>
+        Page.TitleAsync();
 }

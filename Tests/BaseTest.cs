@@ -14,16 +14,28 @@ namespace SauceDemo.Playwright.CSharp.Tests;
 [Parallelizable(ParallelScope.Fixtures)]
 public abstract class BaseTest : PageTest
 {
-    protected static readonly TestSettings Settings = TestSettings.Load();
+    protected static readonly TestSettings Settings =
+        TestSettings.Load();
+
     private bool _traceStarted;
 
     protected LoginPage LoginPage => new(Page);
+
     protected InventoryPage InventoryPage => new(Page);
+
     protected ProductDetailsPage ProductDetailsPage => new(Page);
+
     protected CartPage CartPage => new(Page);
-    protected CheckoutInformationPage CheckoutInformationPage => new(Page);
-    protected CheckoutOverviewPage CheckoutOverviewPage => new(Page);
-    protected CheckoutCompletePage CheckoutCompletePage => new(Page);
+
+    protected CheckoutInformationPage CheckoutInformationPage =>
+        new(Page);
+
+    protected CheckoutOverviewPage CheckoutOverviewPage =>
+        new(Page);
+
+    protected CheckoutCompletePage CheckoutCompletePage =>
+        new(Page);
+
     protected MenuComponent Menu => new(Page);
 
     public override BrowserNewContextOptions ContextOptions()
@@ -33,12 +45,15 @@ public abstract class BaseTest : PageTest
         return new BrowserNewContextOptions
         {
             BaseURL = Settings.BaseUrl,
+
             ViewportSize = new ViewportSize
             {
                 Width = Settings.ViewportWidth,
                 Height = Settings.ViewportHeight
             },
+
             IgnoreHTTPSErrors = false,
+
             RecordVideoDir = Settings.RecordVideo
                 ? ArtifactPaths.Videos
                 : null
@@ -49,17 +64,21 @@ public abstract class BaseTest : PageTest
     public void GlobalSetup()
     {
         LogManager.Configure();
+        VideoManager.Prepare();
     }
 
     [SetUp]
     public async Task BeforeEach()
     {
-        // SauceDemo uses "data-test" attributes rather than
-        // Playwright's default "data-testid" attribute.
+        // SauceDemo uses "data-test" rather than
+        // Playwright's default "data-testid".
         Playwright.Selectors.SetTestIdAttribute("data-test");
 
-        Page.SetDefaultTimeout(Settings.DefaultTimeoutMs);
-        Page.SetDefaultNavigationTimeout(Settings.NavigationTimeoutMs);
+        Page.SetDefaultTimeout(
+            Settings.DefaultTimeoutMs);
+
+        Page.SetDefaultNavigationTimeout(
+            Settings.NavigationTimeoutMs);
 
         Page.Console += (_, msg) =>
             Log.Information(
@@ -97,11 +116,13 @@ public abstract class BaseTest : PageTest
                 TestContext.CurrentContext.Test.Name);
 
         var stamp =
-            DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
+            DateTime.UtcNow.ToString(
+                "yyyyMMdd-HHmmss-fff");
 
         try
         {
-            if (failed && Settings.ScreenshotOnFailure)
+            if (failed &&
+                Settings.ScreenshotOnFailure)
             {
                 var screenshot = Path.Combine(
                     ArtifactPaths.Screenshots,
@@ -131,31 +152,53 @@ public abstract class BaseTest : PageTest
 
                 await Context.Tracing.StopAsync(new()
                 {
-                    Path = failed ? trace : null
+                    Path = failed
+                        ? trace
+                        : null
                 });
 
-                if (failed && File.Exists(trace))
+                _traceStarted = false;
+
+                if (failed &&
+                    File.Exists(trace))
                 {
                     TestContext.AddTestAttachment(
                         trace,
                         "Playwright trace");
                 }
             }
+
+            if (Settings.RecordVideo &&
+                Page.Video is not null)
+            {
+                var video = Page.Video;
+
+                // A Playwright video is finalised when its
+                // page closes.
+                await Page.CloseAsync();
+
+                await VideoManager.SaveAsync(
+                    video,
+                    testName,
+                    stamp);
+            }
         }
         catch (Exception ex)
         {
             Log.Warning(
                 ex,
-                "Unable to collect failure artifacts.");
+                "Unable to collect test artifacts.");
         }
     }
 
     protected async Task LoginAsAsync(
         string profile = "standard")
     {
-        var user = Settings.User(profile);
+        var user =
+            Settings.User(profile);
 
-        await LoginPage.OpenAsync(Settings.BaseUrl);
+        await LoginPage.OpenAsync(
+            Settings.BaseUrl);
 
         await LoginPage.LoginAsync(
             user.Username,
@@ -169,10 +212,12 @@ public abstract class BaseTest : PageTest
     {
         foreach (var product in products)
         {
-            await InventoryPage.AddProductAsync(product);
+            await InventoryPage.AddProductAsync(
+                product);
         }
 
         await InventoryPage.OpenCartAsync();
+
         await CartPage.AssertLoadedAsync();
     }
 
@@ -181,7 +226,8 @@ public abstract class BaseTest : PageTest
     {
         await LoginAsAsync();
 
-        await AddAndOpenCartAsync(products);
+        await AddAndOpenCartAsync(
+            products);
 
         await CartPage.CheckoutAsync();
 
