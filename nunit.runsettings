@@ -1,10 +1,21 @@
 <RunSettings>
 	<RunConfiguration>
+		<!-- Keep one testhost process.
+         NUnit controls test-level parallelism below. -->
 		<MaxCpuCount>1</MaxCpuCount>
-		<ResultsDirectory>artifacts/test-results</ResultsDirectory>
+
+		<ResultsDirectory>
+			artifacts/test-results
+		</ResultsDirectory>
 	</RunConfiguration>
 
 	<NUnit>
-		<NumberOfTestWorkers>1</NumberOfTestWorkers>
+		<NumberOfTestWorkers>4</NumberOfTestWorkers>
 	</NUnit>
+
+	<Playwright>
+		<!-- Playwright assertions have their own timeout.
+         This matches our 10-second framework timeout. -->
+		<ExpectTimeout>10000</ExpectTimeout>
+	</Playwright>
 </RunSettings>
