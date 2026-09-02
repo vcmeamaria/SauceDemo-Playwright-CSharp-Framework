@@ -2,6 +2,11 @@
 # SauceDemo Playwright C# Test Runner
 # ==========================================
 
+param(
+    [ValidateSet("chromium", "firefox")]
+    [string]$Browser = "chromium"
+)
+
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 
 $resultsDirectory = Join-Path `
@@ -19,10 +24,14 @@ New-Item `
     -Path $resultsDirectory `
     | Out-Null
 
-$resultFile = "test-results-$timestamp.trx"
+# Tell Playwright which browser to use.
+$env:BROWSER = $Browser
+
+$resultFile = "test-results-$Browser-$timestamp.trx"
 
 Write-Host ""
 Write-Host "Running SauceDemo Playwright tests..."
+Write-Host "Browser: $Browser"
 Write-Host "Results file: $resultFile"
 Write-Host ""
 
@@ -31,4 +40,9 @@ dotnet test `
     --results-directory $resultsDirectory `
     --logger "trx;LogFileName=$resultFile"
 
-exit $LASTEXITCODE
+$exitCode = $LASTEXITCODE
+
+# Remove the temporary environment variable after the run.
+Remove-Item Env:BROWSER -ErrorAction SilentlyContinue
+
+exit $exitCode
