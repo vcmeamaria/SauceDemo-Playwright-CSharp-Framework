@@ -11,17 +11,23 @@ public static class LogManager
     {
         lock (Sync)
         {
-            if (_configured) return;
+            if (_configured)
+                return;
 
             ArtifactPaths.EnsureCreated();
+
+            var timestamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmmss");
+
+            var logPath = Path.Combine(
+                ArtifactPaths.Logs,
+                $"playwright-{timestamp}.log");
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .WriteTo.File(
-                    Path.Combine(ArtifactPaths.Logs, "playwright-.log"),
-                    rollingInterval: RollingInterval.Day,
-                    retainedFileCountLimit: 14,
+                    logPath,
                     shared: true)
                 .CreateLogger();
 
