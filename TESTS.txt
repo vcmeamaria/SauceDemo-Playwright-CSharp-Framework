@@ -1,0 +1,189 @@
+﻿SauceDemo Playwright C# Framework
+TEST LIST
+========================================
+
+Total automated test cases: 43
+
+This file lists the tests currently executed by the framework.
+Parameterized NUnit tests are listed separately for each executed test case so the total matches the 43 tests reported by the test runner.
+
+
+========================================
+SMOKE TESTS
+Tests/SmokeTests.cs
+13 test cases
+========================================
+
+1. LoginPageLoads
+   Tests that the SauceDemo login page opens successfully and the login button is visible.
+
+2. StandardUserCanLogin
+   Tests that the standard SauceDemo user can log in successfully and reach the inventory page.
+
+3. InventoryPageLoads
+   Tests that the inventory page loads after login and displays all 6 products.
+
+4. ProductCanBeAddedToCart
+   Tests that the Sauce Labs Backpack can be added to the cart and the cart badge updates to 1.
+
+5. RemovingLastProductClearsCartBadge
+   Tests that removing the only product from the cart causes the shopping cart badge to disappear.
+
+6. BackToProductsReturnsToInventory
+   Tests that a user can open the Sauce Labs Backpack product details page, select Back to products, and return to the inventory page.
+
+7. MenuCanBeOpenedAndClosed
+   Tests that the SauceDemo navigation menu can be opened, confirmed as visible, closed, and confirmed as hidden.
+
+8. CartDisplaysCorrectProduct
+   Tests that a product added from the inventory page appears correctly in the shopping cart.
+
+9. ValidCheckoutInformationIsAccepted
+   Tests that valid customer details can be entered during checkout and the user can continue to the checkout overview page.
+
+10. ItemSubtotalIsCorrect
+    Tests that the checkout subtotal for the Sauce Labs Backpack is correctly displayed as $29.99.
+
+11. FinalTotalEqualsSubtotalPlusTax
+    Tests that the final checkout total equals the item subtotal plus tax.
+
+12. OrderCanBeCompleted
+    Tests that a standard user can complete the checkout process and reach the order confirmation page.
+
+13. UserCanLogout
+    Tests that a logged-in user can open the navigation menu, log out, and return to the login page.
+
+
+========================================
+CART AND CHECKOUT REGRESSION TESTS
+Tests/CartCheckoutRegressionTests.cs
+12 test cases
+========================================
+
+14. MultipleCartItemsAreDisplayed
+    Tests that two selected products are both displayed in the shopping cart.
+
+15. ItemCanBeRemovedFromCart
+    Tests that one product can be removed from a cart containing multiple products while the remaining product stays in the cart.
+
+16. ContinueShoppingReturnsToInventory
+    Tests that selecting Continue Shopping from the cart returns the user to the inventory page and keeps the existing cart item.
+
+17. CheckoutRequiredFieldsAreValidated [Case: First Name missing]
+    Code method: CheckoutRequiredFieldsAreValidated
+    Tests that checkout displays "First Name is required" when the first-name field is empty.
+
+18. CheckoutRequiredFieldsAreValidated [Case: Last Name missing]
+    Code method: CheckoutRequiredFieldsAreValidated
+    Tests that checkout displays "Last Name is required" when the last-name field is empty.
+
+19. CheckoutRequiredFieldsAreValidated [Case: Postal Code missing]
+    Code method: CheckoutRequiredFieldsAreValidated
+    Tests that checkout displays "Postal Code is required" when the postal-code field is empty.
+
+20. CheckoutCanBeCancelled
+    Tests that checkout can be cancelled from the customer-information page and the selected product remains in the cart.
+
+21. OverviewContainsAllSelectedItems
+    Tests that all products selected before checkout are displayed on the checkout overview page.
+
+22. TotalsAreInternallyConsistent
+    Tests that the checkout total equals the item subtotal plus tax.
+
+23. CartIsClearedAfterCompletedOrder
+    Tests that the shopping cart badge is absent after completing an order and returning to the inventory page.
+
+24. ResetAppStateClearsCart
+    Tests that using Reset App State from the navigation menu clears the shopping cart.
+
+25. ProtectedPageCannotBeUsedAfterLogout
+    Tests that after logout, directly navigating to inventory.html is blocked and an authentication error is displayed.
+
+
+========================================
+LOGIN REGRESSION TESTS
+Tests/LoginRegressionTests.cs
+10 test cases
+========================================
+
+26. InvalidUsernameIsRejected
+    Tests that an invalid username with the correct SauceDemo password is rejected.
+
+27. InvalidPasswordIsRejected
+    Tests that the standard username with an invalid password is rejected.
+
+28. RequiredFieldValidation [Test name: Empty credentials show username error]
+    Code method: RequiredFieldValidation
+    Tests that submitting both username and password as empty displays "Username is required".
+
+29. RequiredFieldValidation [Test name: Empty password shows password error]
+    Code method: RequiredFieldValidation
+    Tests that submitting the standard username without a password displays "Password is required".
+
+30. LockedOutUserIsRejected
+    Tests that the configured locked-out SauceDemo user cannot log in and receives the locked-out error message.
+
+31. PasswordIsMasked
+    Tests that the password input uses the HTML password type so entered characters are masked.
+
+32. MaliciousOrSpecialInputDoesNotAuthenticate [Case: ' OR 1=1 --]
+    Code method: MaliciousOrSpecialInputDoesNotAuthenticate
+    Tests that SQL-injection-style input does not authenticate.
+
+33. MaliciousOrSpecialInputDoesNotAuthenticate [Case: <script>alert(1)</script>]
+    Code method: MaliciousOrSpecialInputDoesNotAuthenticate
+    Tests that script-like input does not authenticate.
+
+34. MaliciousOrSpecialInputDoesNotAuthenticate [Case: !@#$%^&*]
+    Code method: MaliciousOrSpecialInputDoesNotAuthenticate
+    Tests that special-character input does not authenticate.
+
+35. InventoryCannotBeAccessedWithoutAuthentication
+    Tests that inventory.html cannot be accessed directly by a user who has not authenticated.
+
+
+========================================
+INVENTORY REGRESSION TESTS
+Tests/InventoryRegressionTests.cs
+8 test cases
+========================================
+
+36. MultipleProductsUpdateCartCount
+    Tests that adding the Sauce Labs Backpack and Sauce Labs Bike Light updates the cart badge to 2.
+
+37. ProductCanBeRemovedFromInventory
+    Tests that a product can be added and then removed directly from the inventory page and the cart badge disappears.
+
+38. NameSortingWorks [Test name: Sort names A to Z]
+    Code method: NameSortingWorks
+    Tests that selecting the A-to-Z sorting option places product names in ascending alphabetical order.
+
+39. NameSortingWorks [Test name: Sort names Z to A]
+    Code method: NameSortingWorks
+    Tests that selecting the Z-to-A sorting option places product names in descending alphabetical order.
+
+40. PriceSortingWorks [Test name: Sort price low to high]
+    Code method: PriceSortingWorks
+    Tests that selecting the low-to-high price option places product prices in ascending numerical order.
+
+41. PriceSortingWorks [Test name: Sort price high to low]
+    Code method: PriceSortingWorks
+    Tests that selecting the high-to-low price option places product prices in descending numerical order.
+
+42. SortingPreservesCart
+    Tests that sorting the inventory does not remove an item that has already been added to the shopping cart.
+
+43. ProductDetailsDisplayCorrectProduct
+    Tests that opening the Sauce Labs Backpack product details page displays the correct product name.
+
+
+========================================
+SUMMARY
+========================================
+
+SmokeTests.cs                     13 test cases
+CartCheckoutRegressionTests.cs   12 test cases
+LoginRegressionTests.cs          10 test cases
+InventoryRegressionTests.cs       8 test cases
+                                 ----------------
+TOTAL                             43 test cases

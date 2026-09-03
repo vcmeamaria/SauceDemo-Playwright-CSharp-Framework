@@ -42,6 +42,42 @@ public sealed class SmokeTests : BaseTest
         await InventoryPage.AssertCartCountAsync(1);
     }
 
+    [Test, Category("TC-INV-008")]
+    public async Task RemovingLastProductClearsCartBadge()
+    {
+        await LoginAsAsync();
+
+        await InventoryPage.AddProductAsync(Backpack);
+        await InventoryPage.AssertCartCountAsync(1);
+
+        await InventoryPage.RemoveProductAsync(Backpack);
+        await InventoryPage.AssertCartBadgeAbsentAsync();
+    }
+
+    [Test, Category("TC-INV-009")]
+    public async Task BackToProductsReturnsToInventory()
+    {
+        await LoginAsAsync();
+
+        await InventoryPage.OpenProductAsync(Backpack);
+        await ProductDetailsPage.AssertProductAsync(Backpack);
+
+        await ProductDetailsPage.BackToProductsAsync();
+        await InventoryPage.AssertLoadedAsync();
+    }
+
+    [Test, Category("TC-NAV-008")]
+    public async Task MenuCanBeOpenedAndClosed()
+    {
+        await LoginAsAsync();
+
+        await InventoryPage.OpenMenuAsync();
+        await Menu.AssertOpenAsync();
+
+        await Menu.CloseAsync();
+        await Menu.AssertClosedAsync();
+    }
+
     [Test, Category("TC-CART-002")]
     public async Task CartDisplaysCorrectProduct()
     {
