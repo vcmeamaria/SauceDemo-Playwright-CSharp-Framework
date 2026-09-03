@@ -28,6 +28,10 @@ public sealed class MenuComponent : BasePage
         Expect(Menu)
             .ToBeVisibleAsync();
 
+    public Task AssertClosedAsync() =>
+        Expect(Menu)
+            .ToBeHiddenAsync();
+
     public async Task ResetAppStateAsync() =>
         await ClickAsync(
             Reset,
